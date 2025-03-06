@@ -13,12 +13,12 @@ pygame.display.set_caption('sudoku!')
 #creates the display object
 screen = pygame.display.set_mode(size)
 
-screen_width = 400
-screen_height = 400
+screen_width = 800
+screen_height = 800
 screen = pygame.display.set_mode((screen_width, screen_height))
-grid_width = 300
-grid_height = 300
-sudokuBlockSize = 33
+grid_width = 600
+grid_height = 600
+sudokuBlockSize = 66
 rect_list= []
 color = pygame.Color(120,95,30)
 
@@ -29,12 +29,7 @@ def drawSudokuGrid():
             rect_list.append(rect)
             pygame.draw.rect(screen, color, rect, 1)
     
-
-
-
 pygame.display.flip()
-
-
 running = True
 while running:
     
@@ -43,8 +38,18 @@ while running:
             
             if event.type == pygame.QUIT: 
                 running = False
+    
     screen.fill(pygame.Color(232, 196, 144))
+
     drawSudokuGrid()
+    if event.type == pygame.MOUSEBUTTONUP:
+            mouse_pos = pygame.mouse.get_pos()
+            for item in rect_list:
+                if item.collidepoint(mouse_pos):
+                    print(str(item))
+                    quit()
+                else:
+                    print("nope")
     pygame.display.flip()
 
 pygame.quit()
