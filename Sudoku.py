@@ -3,27 +3,9 @@ import random
 import requests
 pygame.init()
 
-pi_url = 'https://api.api-ninjas.com/v1/sudokugenerate?difficulty=easy'
-response = requests.get(pi_url, headers={'X-Api-Key': '0D+nsuUABvU9bHDcJytEag==khTAs59PpAVAGQRE'})
 
-solution_lists = response.json()['puzzle']
-solution = []
-output_lists = response.json()['solution']
-output = []
-for i in range(len(solution_lists)):
-    solution.extend(solution_lists[i])
-
-for i in range(len(output_lists)):
-    output.extend(output_lists[i])
-
-print('solution:  ' + str(solution))
-print('output:  ' + str(output))
-
-for i in range(len(solution)):
-    if solution[i] == None:
-        solution[i] = 10
-
-print(solution)
+nums = []
+true_nums = []
 size = width, height = 800, 700
 pygame.display.set_caption('sudoku!')
 screen = pygame.display.set_mode(size)
@@ -47,13 +29,8 @@ medium = pygame.Rect(400,300,50,50)
 hard = pygame.Rect(500,300,50,50)
 
 
-#down means sideways
-nums = solution
-true_nums = output
 
-for i in range(len(nums)):
-    if nums[i] == 0:
-        nums[i] = 10
+
 
 
 background_color = pygame.Color(232, 196, 144)
@@ -92,7 +69,40 @@ def difficulty_screen():
     pygame.display.flip()
 
 #user inputted numbers
+def get_solution(url_difficulty):
+    
+    pi_url = f'https://api.api-ninjas.com/v1/sudokugenerate?difficulty={url_difficulty}'
+    response = requests.get(pi_url, headers={'X-Api-Key': '0D+nsuUABvU9bHDcJytEag==khTAs59PpAVAGQRE'})
+    if response.status_code == 200:
+
+        solution_lists = response.json()['puzzle']
+        solution = []
+        output_lists = response.json()['solution']
+        output = []
+        for i in range(len(solution_lists)):
+            solution.extend(solution_lists[i])
+
+        for i in range(len(output_lists)):
+            output.extend(output_lists[i])
+
+
+        print('solution:  ' + str(solution))
+        print('output:  ' + str(output))
+
+        for i in range(len(solution)):
+            if solution[i] == None:
+                solution[i] = 10
+        
+        return solution, output
+    else:
+        print("api down")
+        quit()
+
 def print_numbers():
+    
+    for i in range(len(nums)):
+        if nums[i] == 0:
+            nums[i] = 10
     
     font = pygame.font.SysFont(None, 24)
     i = 0
@@ -106,6 +116,8 @@ def print_numbers():
                 img = font.render(str(nums[i]), True, pygame.Color(120,95,30))
                 screen.blit(img, (x+27, y+25))
                 i+=1
+    
+
 
 print(empty_indexes)     
 #main loop          
@@ -122,12 +134,15 @@ while running:
                 mouse_pos = pygame.mouse.get_pos()
                 if easy.collidepoint(mouse_pos):
                     print('easy')
+                    nums, true_nums = get_solution('easy')
                     game_start = False
                 if medium.collidepoint(mouse_pos):
                     print('medium')
+                    nums, true_nums = get_solution('medium')
                     game_start = False
                 if hard.collidepoint(mouse_pos):
                     print('hard')
+                    nums, true_nums = get_solution('hard')
                     game_start = False
             
 
@@ -190,8 +205,9 @@ while running:
             
             screen.fill(background_color)
             drawSudokuGrid()
-            # sol_generator()
             print_numbers()
+            # sol_generator()
+    
             if game_over == True:
                 a = 0
                 b = len(empty_indexes)
