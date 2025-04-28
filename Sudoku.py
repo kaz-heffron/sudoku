@@ -27,7 +27,10 @@ game_start = True
 easy = pygame.Rect(300,300,50,50)
 medium = pygame.Rect(400,300,50,50)
 hard = pygame.Rect(500,300,50,50)
-
+marking = False
+mark_button = pygame.Rect(620,130,40,30)
+p_num = 0
+marked_list = [[0,0,0,0,0,0,0,0,0,] for _ in range(81)]
 
 
 
@@ -35,19 +38,22 @@ hard = pygame.Rect(500,300,50,50)
 
 background_color = pygame.Color(232, 196, 144)
 color = pygame.Color(120,95,30)
-
-#grid
-def drawSudokuGrid():
-    for x in range(10, grid_width + 10, sudokuBlockSize):
+for x in range(10, grid_width + 10, sudokuBlockSize):
         for y in range(10, grid_height + 10, sudokuBlockSize):
             rect = pygame.Rect(x, y, sudokuBlockSize, sudokuBlockSize)
             rect_list.append(rect)
-            pygame.draw.rect(screen, color, rect, 1)       
+            
+#grid
+def drawSudokuGrid():
+    for rect in rect_list:
+        pygame.draw.rect(screen, color, rect, 1)
     cor = 10
     for i in range(4):
         pygame.draw.line(screen, pygame.Color(8, 8, 8), (10,cor), (603,cor),width=2)
         pygame.draw.line(screen, pygame.Color(8, 8, 8), (cor,10), (cor,603),width=2)
         cor += 197
+    
+    pygame.draw.rect(screen, color, mark_button, 1)
 
 def difficulty_screen():
     screen.fill(background_color)
@@ -84,11 +90,7 @@ def get_solution(url_difficulty):
 
         for i in range(len(output_lists)):
             output.extend(output_lists[i])
-
-
-        print('solution:  ' + str(solution))
-        print('output:  ' + str(output))
-
+  
         for i in range(len(solution)):
             if solution[i] == None:
                 solution[i] = 10
@@ -118,9 +120,32 @@ def print_numbers():
                 i+=1
     
 
+def markups():
+    a = 0
+    if a < 81:
+        for rect in rect_list:
+            if nums[rect_list.index(rect)] != 10:
+                continue
+            x = rect.x + 8
+            y = rect.y + 8
+            font = pygame.font.SysFont(None, 17)
+            for i in range(9):
+                marks = font.render(str(p_num), True, color)
+                screen.blit(marks, (x,y))
 
-print(empty_indexes)     
-#main loop          
+                if i == 2:
+                    x += 22
+                    y = rect.y + 8
+                elif i == 5:
+                    x += 22
+                    y = rect.y + 8
+                else:
+                    y += 22   
+            a += 1
+             
+
+#main loop     
+
 running = True
 while running:
     
@@ -133,15 +158,12 @@ while running:
             if event.type == pygame.MOUSEBUTTONDOWN:
                 mouse_pos = pygame.mouse.get_pos()
                 if easy.collidepoint(mouse_pos):
-                    print('easy')
                     nums, true_nums = get_solution('easy')
                     game_start = False
                 if medium.collidepoint(mouse_pos):
-                    print('medium')
                     nums, true_nums = get_solution('medium')
                     game_start = False
                 if hard.collidepoint(mouse_pos):
-                    print('hard')
                     nums, true_nums = get_solution('hard')
                     game_start = False
             
@@ -152,34 +174,40 @@ while running:
             if event.type == pygame.QUIT: 
                 pygame.quit()
             #on key press
-            if event.type == pygame.KEYDOWN:  
-                if selected_rect:
-                    if event.key == pygame.K_0:
-                        key_var = 10              
-                    if event.key == pygame.K_1:
-                        key_var = 1              
-                    if event.key == pygame.K_2:
-                        key_var = 2      
-                    if event.key == pygame.K_3:
-                        key_var = 3
-                    if event.key == pygame.K_4:
-                        key_var = 4
-                    if event.key == pygame.K_5:
-                        key_var = 5
-                    if event.key == pygame.K_6:
-                        key_var = 6
-                    if event.key == pygame.K_7:
-                        key_var = 7
-                    if event.key == pygame.K_8:
-                        key_var = 8
-                    if event.key == pygame.K_9:
-                        key_var = 9
+            if event.type == pygame.KEYDOWN: 
+                if event.key == pygame.K_1 and marking == True:
+                    print('marking')  
+                    p_num = 1
+                if event.key == pygame.K_0:
+                    key_var = 10             
+                if event.key == pygame.K_1:
+                    key_var = 1            
+                if event.key == pygame.K_2:
+                    key_var = 2      
+                if event.key == pygame.K_3:
+                    key_var = 3
+                if event.key == pygame.K_4:
+                    key_var = 4
+                if event.key == pygame.K_5:
+                    key_var = 5
+                if event.key == pygame.K_6:
+                    key_var = 6
+                if event.key == pygame.K_7:
+                    key_var = 7
+                if event.key == pygame.K_8:
+                    key_var = 8
+                if event.key == pygame.K_9:
+                    key_var = 9
                 if event.key == pygame.K_g:
                     game_over = True
             
             #putting inputted number into correct cell
+            
             if event.type == pygame.MOUSEBUTTONDOWN:
                     mouse_pos = pygame.mouse.get_pos()
+                    if mark_button.collidepoint(mouse_pos):
+                        marking = True
+                        print('mark')
                     for item in rect_list:
                         if item.collidepoint(mouse_pos):
                             selected_rect = item
@@ -203,53 +231,58 @@ while running:
             
             
             
-            screen.fill(background_color)
-            drawSudokuGrid()
-            print_numbers()
-            # sol_generator()
-    
-            if game_over == True:
-                a = 0
-                b = len(empty_indexes)
-                for i in range(len(nums)):
-                    if a == b:
-                        break
-                    if empty_indexes[a] == i:
-                        nums[i] = 10
-                    a +=1
-                game_over = False
-
             
-            #text info to the right of board
-            font = pygame.font.SysFont(None, 17)
-            secondary_font = pygame.font.SysFont(None, 22)
-            tertiary_font = pygame.font.SysFont(None, 14)
+    
+    z = 0
+    # sol_generator()
 
-            selected_text = font.render('selected number: ', True, color)
-            screen.blit(selected_text, (620,20))
+    if game_over == True:
+        a = 0
+        b = len(empty_indexes)
+        for i in range(len(nums)):
+            if a == b:
+                break
+            if empty_indexes[a] == i:
+                nums[i] = 10
+            a +=1
+        game_over = False
 
-            if key_var == 10:
-                text_surface = secondary_font.render('0', True, color)
-                screen.blit(text_surface, (720,18))
-            else:
-                text_surface = secondary_font.render(str(key_var), True, color)
-                screen.blit(text_surface, (720,18))
+    screen.fill(background_color)
+    drawSudokuGrid()
+    if z == 0:
+        markups()
+        z += 1
+    print_numbers()
+    #text info to the right of board
+    font = pygame.font.SysFont(None, 17)
+    secondary_font = pygame.font.SysFont(None, 22)
+    tertiary_font = pygame.font.SysFont(None, 14)
 
-            selected_text = tertiary_font.render('(click 0 to clear cell)', True, color)
-            screen.blit(selected_text, (620,35))
+    selected_text = font.render('selected number: ', True, color)
+    screen.blit(selected_text, (620,20))
 
-            if incor == 'input is incorrect!':
-                in_correct = font.render(incor, True, color)
-                screen.blit(in_correct, (620,60))
+    if key_var == 10:
+        text_surface = secondary_font.render('0', True, color)
+        screen.blit(text_surface, (720,18))
+    else:
+        text_surface = secondary_font.render(str(key_var), True, color)
+        screen.blit(text_surface, (720,18))
 
-            if nums == true_nums:
-                win_display = font.render('win', True, color)
-                screen.blit(win_display, (620,120))
-            mis_display = font.render(str(mistakes)+' / 3 mistakes', True, color)
-            screen.blit(mis_display, (620,100))
-            if mistakes == 3:
-                lose_display = font.render('lose', True, color)
-                screen.blit(lose_display, (620,120))
-            pygame.display.flip()
+    selected_text = tertiary_font.render('(click 0 to clear cell)', True, color)
+    screen.blit(selected_text, (620,35))
+
+    if incor == 'input is incorrect!':
+        in_correct = font.render(incor, True, color)
+        screen.blit(in_correct, (620,60))
+
+    if nums == true_nums:
+        win_display = font.render('win', True, color)
+        screen.blit(win_display, (620,120))
+    mis_display = font.render(str(mistakes)+' / 3 mistakes', True, color)
+    screen.blit(mis_display, (620,100))
+    if mistakes == 3:
+        lose_display = font.render('lose', True, color)
+        screen.blit(lose_display, (620,120))
+    pygame.display.flip()
 
 pygame.quit()
