@@ -53,7 +53,19 @@ def drawSudokuGrid():
         pygame.draw.line(screen, pygame.Color(8, 8, 8), (cor,10), (cor,603),width=2)
         cor += 197
     
-    pygame.draw.rect(screen, color, mark_button, 1)
+
+def drawMarkButton():
+    if marking: 
+        pygame.draw.rect(screen, color, mark_button, 6)
+        font = pygame.font.SysFont(None, 17)
+        mark_text = font.render('mark', True, (255,0,0))
+        screen.blit(mark_text, (mark_button.x+5,mark_button.y+8))
+    else:
+        pygame.draw.rect(screen, color, mark_button, 1)
+        font = pygame.font.SysFont(None, 17)
+        mark_text = font.render('mark', True, color)
+        screen.blit(mark_text, (mark_button.x+5,mark_button.y+8))
+
 
 def difficulty_screen():
     screen.fill(background_color)
@@ -129,8 +141,9 @@ def markups():
             x = rect.x + 8
             y = rect.y + 8
             font = pygame.font.SysFont(None, 17)
+            current_marks = marked_list[rect_list.index(rect)]
             for i in range(9):
-                marks = font.render(str(p_num), True, color)
+                marks = font.render(str(current_marks[i]), True, color)
                 screen.blit(marks, (x,y))
 
                 if i == 2:
@@ -175,9 +188,6 @@ while running:
                 pygame.quit()
             #on key press
             if event.type == pygame.KEYDOWN: 
-                if event.key == pygame.K_1 and marking == True:
-                    print('marking')  
-                    p_num = 1
                 if event.key == pygame.K_0:
                     key_var = 10             
                 if event.key == pygame.K_1:
@@ -206,25 +216,44 @@ while running:
             if event.type == pygame.MOUSEBUTTONDOWN:
                     mouse_pos = pygame.mouse.get_pos()
                     if mark_button.collidepoint(mouse_pos):
-                        marking = True
-                        print('mark')
+                        marking = not marking
                     for item in rect_list:
                         if item.collidepoint(mouse_pos):
                             selected_rect = item
-    #after here, this stuff goes in key press function
-                            for i in range(len(nums)):
-                                if i == rect_list.index(item):
-                                    #checking if number inputted matches number in solution
-                                    if key_var:
-                                        nums[i]=str(key_var)
-                                        nums[i]=key_var
-                                        if nums[i] == true_nums[i]:
-                                            incor = 'correct'
-                                        else:
-                                            incor = 'input is incorrect!'
-                                            mistakes+=1
-                                        
-                                
+                            if not marking:
+                                for i in range(len(nums)):
+                                    if i == rect_list.index(item):
+                                        #checking if number inputted matches number in solution
+                                        if key_var:
+                                            nums[i]=str(key_var)
+                                            nums[i]=key_var
+                                            if nums[i] == true_nums[i]:
+                                                incor = 'correct'
+                                            else:
+                                                incor = 'input is incorrect!'
+                                                mistakes+=1
+                                            
+                            else:
+                                if key_var == 1:
+                                    marked_list[rect_list.index(selected_rect)][0] = 1
+                                if key_var == 2:
+                                    marked_list[rect_list.index(selected_rect)][1] = 2
+                                if key_var == 3:
+                                    marked_list[rect_list.index(selected_rect)][2] = 3
+                                if key_var == 4:
+                                    marked_list[rect_list.index(selected_rect)][3] = 4
+                                if key_var == 5:
+                                    marked_list[rect_list.index(selected_rect)][4] = 5
+                                if key_var == 6:
+                                    marked_list[rect_list.index(selected_rect)][5] = 6
+                                if key_var == 7:
+                                    marked_list[rect_list.index(selected_rect)][6] = 7
+                                if key_var == 8:
+                                    marked_list[rect_list.index(selected_rect)][7] = 8
+                                if key_var == 9:
+                                    marked_list[rect_list.index(selected_rect)][8] = 9
+                                    
+
                             break
                         else:
                             continue
@@ -249,6 +278,7 @@ while running:
 
     screen.fill(background_color)
     drawSudokuGrid()
+    drawMarkButton()
     if z == 0:
         markups()
         z += 1
