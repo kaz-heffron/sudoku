@@ -143,7 +143,10 @@ def markups():
             font = pygame.font.SysFont(None, 17)
             current_marks = marked_list[rect_list.index(rect)]
             for i in range(9):
-                marks = font.render(str(current_marks[i]), True, color)
+                if current_marks[i] == 0:
+                    marks = font.render(str(current_marks[i]), True, background_color)
+                else:
+                    marks = font.render(str(current_marks[i]), True, color)
                 screen.blit(marks, (x,y))
 
                 if i == 2:
@@ -252,7 +255,7 @@ while running:
                                     marked_list[rect_list.index(selected_rect)][7] = 8
                                 if key_var == 9:
                                     marked_list[rect_list.index(selected_rect)][8] = 9
-                                    
+
 
                             break
                         else:
