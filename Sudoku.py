@@ -32,6 +32,7 @@ mark_button = pygame.Rect(620,130,40,30)
 new_g_button = pygame.Rect(43,623,80,23)
 p_num = 0
 marked_list = [[0,0,0,0,0,0,0,0,0,] for _ in range(81)]
+new_game = False
 
 
 
@@ -88,6 +89,8 @@ def drawSudokuGrid():
         pygame.draw.line(screen, pygame.Color(8, 8, 8), (10,cor), (603,cor),width=2)
         pygame.draw.line(screen, pygame.Color(8, 8, 8), (cor,10), (cor,603),width=2)
         cor += 197
+
+def draw_new_game_button():
     pygame.draw.rect(screen, color, new_g_button, 1)
     font = pygame.font.SysFont(None, 16)
     new_g_text = font.render('NEW GAME', True, color)
@@ -128,7 +131,7 @@ def difficulty_screen():
 
 #user inputted numbers
 def get_solution(url_difficulty):
-    
+    marked_list = [[0,0,0,0,0,0,0,0,0,] for _ in range(81)]
     pi_url = f'https://api.api-ninjas.com/v1/sudokugenerate?difficulty={url_difficulty}'
     response = requests.get(pi_url, headers={'X-Api-Key': '0D+nsuUABvU9bHDcJytEag==khTAs59PpAVAGQRE'})
     if response.status_code == 200:
@@ -147,7 +150,7 @@ def get_solution(url_difficulty):
             if solution[i] == None:
                 solution[i] = 10
         
-        return solution, output
+        return solution, output, marked_list
     else:
         print("api down")
         quit()
@@ -237,7 +240,6 @@ def clean_marks(key_var):
 
 running = True
 while running:
-    
     while game_start == True:
         #difficulty level screen
         difficulty_screen()
@@ -247,13 +249,13 @@ while running:
             if event.type == pygame.MOUSEBUTTONDOWN:
                 mouse_pos = pygame.mouse.get_pos()
                 if easy.collidepoint(mouse_pos):
-                    nums, true_nums = get_solution('easy')
+                    nums, true_nums, marked_list = get_solution('easy')
                     game_start = False
                 if medium.collidepoint(mouse_pos):
-                    nums, true_nums = get_solution('medium')
+                    nums, true_nums, marked_list = get_solution('medium')
                     game_start = False
                 if hard.collidepoint(mouse_pos):
-                    nums, true_nums = get_solution('hard')
+                    nums, true_nums, marked_list = get_solution('hard')
                     game_start = False
             
 
@@ -293,6 +295,8 @@ while running:
                     mouse_pos = pygame.mouse.get_pos()
                     if mark_button.collidepoint(mouse_pos):
                         marking = not marking
+                    if new_g_button.collidepoint(mouse_pos):
+                        game_start = True 
                     for item in rect_list:
                         if item.collidepoint(mouse_pos):
                             selected_rect = item
@@ -356,9 +360,8 @@ while running:
     screen.fill(background_color)
     drawSudokuGrid()
     drawMarkButton()
-    if z == 0:
-        markups()
-        z += 1
+    draw_new_game_button()
+    markups()
     print_numbers()
     #text info to the right of board
     font = pygame.font.SysFont(None, 17)
